@@ -1,22 +1,30 @@
 # packages
 import time
+import os
 
 # classes
 from classes.binance import Binance
 from classes.amazon import Amazon
 from classes.database import Database
 from classes.helper import Helper
+from dotenv import load_dotenv
+
+# load environment vars
+load_dotenv()
+
+# flag file
+flagfile = os.getenv('OUTPUT_FOLDER') + "running.txt"
 
 # Check if this process is already on execution
-if Helper.isRunning():
+if Helper.isRunning(flagfile):
 	print("There is another process on execution")
 	exit(-1)
 
 # Flag this process
-Helper.runningFlag()
+Helper.runningFlag(flagfile)
 
 # Max tasks to be executed
-MAX_TASKS = 1
+MAX_TASKS = 5
 proccesed = 0
 
 # clients
@@ -46,11 +54,11 @@ for task in tasks:
 	pair = token[2]
 	temporality = interval[1]
 
-	# candles for first token
+	# candles
 	candles = binance.getCandles(pair, temporality)
 
 	# output
-	filepath = "output/" + pair + "_" + temporality + ".csv"
+	filepath = os.getenv('OUTPUT_FOLDER') + pair + "_" + temporality + ".csv"
 
 	# export
 	Helper.writeCSV(candles, filepath)
@@ -72,7 +80,7 @@ for task in tasks:
 	if proccesed == MAX_TASKS:
 
 		# clean
-		helper.removeRunningFlag()
+		Helper.removeRunningFlag(flagfile)
 
 		# bye!
 		print("[task] maximum of tasks successfully executed.")

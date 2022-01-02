@@ -1,18 +1,18 @@
 # modules
 import json
 import csv
-import os.path
+import os
 
 # classes
 class Helper:
 
-    def isRunning(filename = "running.txt"):
+    def isRunning(filename):
         return os.path.isfile(filename)
 
-    def runningFlag(filename = "running.txt"):
+    def runningFlag(filename):
         open(filename, 'a').close()
 
-    def removeRunningFlag(filename = "running.txt"):
+    def removeRunningFlag(filename):
         os.remove(filename)
 
     def formatNumber(number, decimals = 2):

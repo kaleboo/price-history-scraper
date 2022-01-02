@@ -107,6 +107,9 @@ class Binance:
     # get candles
     def getCandles(self, pair, interval):
 
+        # execution time
+        start_time = time.time()
+
         # validate
         if not Helper.isValidInterval(interval):
             print("invalid " + interval + " interval.")
@@ -134,8 +137,8 @@ class Binance:
         requests = 0
 
         # information
-        print("[" + pair + "] There is " + str(candles) + " candles in 2021 for given " + interval + " interval")
-        print("[" + pair + "] This requires " + str(loops) + " requests")
+        print("[" + pair + "_" + interval + "] There is " + str(candles) + " candles in 2021 for given " + interval + " interval")
+        print("[" + pair + "_" + interval + "] This requires " + str(loops) + " requests")
 
 
         # list
@@ -188,11 +191,13 @@ class Binance:
                 items.append(item)
 
             progress = round(((i + 1) / loops) * 100, 2)
-            print("[" + pair + "] loop: " + str(i + 1) + " candles: " + str(len(items)) + " progress: " + str(progress) + "%")
+            print("[" + pair + "_" + interval + "] loop: " + str(i + 1) + " candles: " + str(len(items)) + " progress: " + str(progress) + "%")
 
             # update
             requests = requests + 1
 
+        # execution time
+        print("--- %s seconds ---" % (time.time() - start_time))
 
         return items
 

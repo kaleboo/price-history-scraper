@@ -1,5 +1,7 @@
 # packages
 import os
+import time
+
 from dotenv import load_dotenv
 from mysql.connector import connect, Error
 from datetime import datetime
@@ -60,8 +62,18 @@ class Database:
 
     def insertCandles(self, id_token, id_interval, candles):
  
+        # exeuction time
+        start_time = time.time()
 
-        query = "INSERT INTO candles (id_token, id_interval, open, high, low, close, volume_coin_1, volume_coin_2, open_time, close_time, open_at, close_at) VALUES "
+        # query
+        query = "INSERT INTO candles (id_token, id_interval, open, high, low, close, volume_coin_1, volume_coin_2, open_time, close_time, open_at, close_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+        # list
+        my_data = []
+
+        # mysql
+        mydb = self.getClient()
+        mycursor = mydb.cursor()
 
         for candle in candles:
 
@@ -85,20 +97,37 @@ class Database:
             item.append(str(candle["volume_coin_2"]))
             item.append(open_time)
             item.append(close_time)
-            item.append('"' + open_at + '"')
-            item.append('"' + close_at + '"')
+            item.append(open_at)
+            item.append(close_at)
 
             # line
-            line = ", ".join(item)
-            line = "(" + line + "), "
+            my_tuple = tuple(item)
+            my_data.append(my_tuple)
 
-            query = query + "\n " + line
+            # commit in batch size of 10,000
+            if (len(my_data) == 10000):
+                try:
+                    mycursor.executemany(query, my_data)
+                    mydb.commit()
+                    print("[mysql] " + str(len(my_data)) + " rows inserted.")
+                    my_data = []
+                except:
+                    print("ooops..")
+                    exit(-1)
 
-        # remove lastest 2 chars
-        query = query[:-2]
 
-        # execute
-        self.query(query)
+        # last insert
+        if len(my_data) > 0:
+            try:
+                mycursor.executemany(query, my_data)
+                mydb.commit()
+                print("[mysql] " + str(len(my_data)) + " rows inserted.")
+            except:
+                print("ooops..")
+            
+
+        print("--- %s seconds ---" % (time.time() - start_time))
+        mycursor.close()
 
 
 
