@@ -6,6 +6,8 @@ __pycache__/
 .DS_Store
 running.txt
 
+app/output/
+
 # C extensions
 *.so
 
